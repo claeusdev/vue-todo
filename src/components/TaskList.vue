@@ -172,7 +172,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
-
+      animation-duration: 0.2s;
       .task-title {
         display: flex;
         justify-content: space-evenly;
