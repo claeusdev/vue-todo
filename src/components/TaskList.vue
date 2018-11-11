@@ -4,7 +4,8 @@
     placeholder="What do you need to do?" v-model="newTask" @keyup.enter="addTask">
     <div v-for="(task, index) in tasks" :key="task.id" class="task">
       <div class="task-title" >
-        <div class="task-title__label" v-if="!task.editing" @click="editTask(task)">
+        <input type="checkbox" v-model="task.completed">
+        <div class="task-title__label" v-if="!task.editing" @click="editTask(task)" :class="{ completed : task.completed}">
           {{ task.title }}
         </div>
         <input v-else type="text" v-model="task.title" class="task-edit" @blur="doneEditing(task)" 
@@ -16,6 +17,14 @@
           &times;
         </div>
       </div>
+    </div>
+    <div class="bottom">
+      <div>
+        <label for="">
+          <input type="checkbox" @change="checkAllTasks" :checked='!noneRemaining'> Check All
+        </label>
+      </div>
+      <div>{{remaining}} items left</div>
     </div>
   </div>
 </template>
@@ -50,6 +59,14 @@ export default {
       ],
     };
   },
+  computed: {
+    remaining() {
+      return this.tasks.filter(task => !task.completed).length
+    },
+    noneRemaining() {
+      return this.remaining != 0;
+    },
+  },
   directives: {
     focus: {
       inserted(el) { el.focus(); },
@@ -75,12 +92,14 @@ export default {
       this.beforeEditCache = newTask.title;
       newTask.editing = true;
     },
-
     doneEditing(task) {
       const newTask = task;
+      if (newTask.title.trim().length === 0) {
+        task.title = this.beforeEditCache;
+      }
+      
       newTask.editing = false;
     },
-
     cancelEdit(task) {
       const newTask = task;
       task.title = this.beforeEditCache
@@ -89,10 +108,12 @@ export default {
     removeTask(index) {
       this.tasks.splice(index, 1);
     },
+    checkAllTasks() {
+      this.tasks.forEach(task => task.completed = event.target.checked)
+    }
   },
 };
 </script>
-
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang='scss'>
   .task-input {
@@ -110,6 +131,11 @@ export default {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      .task-title {
+        display: flex;
+        justify-content: space-evenly;
+      }
     }
 
   .remove-task {
@@ -139,5 +165,38 @@ export default {
     &:focus {
       outline: none;
     }
+  }
+
+  .completed {
+    text-decoration: line-through;
+    color: red;
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid lightgrey;
+    padding-top: 14px;
+    margin-bottom: 12px;
+
+  }
+
+  button {
+    background-color: white;
+    appearance: none;
+
+    &:hover {
+      background: lightgreen;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .active {
+    background: lightgreen;
+
   }
 </style>
