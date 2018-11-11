@@ -22,7 +22,7 @@
     </div>
     <input type="text" class="task-input" 
     placeholder="What do you need to do?" v-model="newTask" @keyup.enter="addTask">
-    <transition-group name="fade" enter-active-class="animated-fadeinUp" leave-active-class="animated fadeOutDown">
+    <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
       <div v-for="(task, index) in filteredTasks" :key="task.id" class="task">
         <div class="task-title" >
           <input type="checkbox" v-model="task.completed">
@@ -156,6 +156,7 @@ export default {
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang='scss'>
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.css');
   .task-input {
     width: 100%;
     padding: 10px;
