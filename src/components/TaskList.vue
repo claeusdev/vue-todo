@@ -1,23 +1,45 @@
 <template>
   <div>
-    <input type="text" class="task-input" 
-    placeholder="What do you need to do?" v-model="newTask" @keyup.enter="addTask">
-    <div v-for="(task, index) in tasks" :key="task.id" class="task">
-      <div class="task-title" >
-        <input type="checkbox" v-model="task.completed">
-        <div class="task-title__label" v-if="!task.editing" @click="editTask(task)" :class="{ completed : task.completed}">
-          {{ task.title }}
-        </div>
-        <input v-else type="text" v-model="task.title" class="task-edit" @blur="doneEditing(task)" 
-        @keyup.enter="doneEditing(task)" v-focus @keyup.esc="cancelEdit(task)"> 
+    <div class="filters">
+      <div class="buttons">
+        <button :class="{active: filter == 'all'}" @click="filter = 'all'">
+          All
+        </button>
+        <button :class="{active: filter == 'active'}" @click="filter = 'active'">
+          Active
+        </button>
+        <button :class="{active: filter == 'completed'}" @click="filter = 'completed'">
+          Completed
+        </button>
       </div>
-
-      <div class="task-actions" >
-        <div class="remove-task" @click="removeTask(index)">
-          &times;
-        </div>
+      <div class="clear-completed">
+        <transition name="fade">
+          <button v-if="showClearCompletedButton" @click="clearCompleted">
+            Clear completed
+          </button>
+        </transition>
       </div>
     </div>
+    <input type="text" class="task-input" 
+    placeholder="What do you need to do?" v-model="newTask" @keyup.enter="addTask">
+    <transition-group name="fade" enter-active-class="animated-fadeinUp" leave-active-class="animated fadeOutDown">
+      <div v-for="(task, index) in filteredTasks" :key="task.id" class="task">
+        <div class="task-title" >
+          <input type="checkbox" v-model="task.completed">
+          <div class="task-title__label" v-if="!task.editing" @click="editTask(task)" :class="{ completed : task.completed}">
+            {{ task.title }}
+          </div>
+          <input v-else type="text" v-model="task.title" class="task-edit" @blur="doneEditing(task)" 
+          @keyup.enter="doneEditing(task)" v-focus @keyup.esc="cancelEdit(task)"> 
+        </div>
+
+        <div class="task-actions" >
+          <div class="remove-task" @click="removeTask(index)">
+            &times;
+          </div>
+        </div>
+      </div>
+    </transition-group>
     <div class="bottom">
       <div>
         <label for="">
@@ -37,6 +59,7 @@ export default {
       newTask: '',
       idForTask: 4,
       beforeEditCache: '',
+      filter: 'all',
       tasks: [
         {
           id: 1,
@@ -66,6 +89,20 @@ export default {
     noneRemaining() {
       return this.remaining != 0;
     },
+    filteredTasks() {
+      if (this.filter === 'all') {
+        return this.tasks
+      } else if (this.filter === 'active') {
+        return this.tasks.filter(task => !task.completed)
+      } else if (this.filter === 'completed') {
+        return this.tasks.filter(task => task.completed)
+      }
+
+      return this.tasks
+    },
+    showClearCompletedButton() {
+      return this.tasks.filter(task => task.completed).length > 0;
+    }
   },
   directives: {
     focus: {
@@ -110,6 +147,9 @@ export default {
     },
     checkAllTasks() {
       this.tasks.forEach(task => task.completed = event.target.checked)
+    },
+    clearCompleted() {
+      this.tasks = this.tasks.filter(task => !task.completed)
     }
   },
 };
@@ -172,7 +212,8 @@ export default {
     color: red;
   }
 
-  .bottom {
+  .bottom,
+  .filters {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -198,5 +239,15 @@ export default {
   .active {
     background: lightgreen;
 
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity .4s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
   }
 </style>
